@@ -19,6 +19,11 @@ import {logoDiscord, logoTwitter,logoYoutube} from "ionicons/icons";
 import usePersistentState from '../hooks/usePersistentState';
 import meLogo from '../images/me.png';
 
+import ethers, { Contract, formatUnits, JsonRpcProvider } from 'ethers'
+import { abi } from '../contract/abi';
+import { contractProvider } from '../contract/get-balance';
+import { async } from '@firebase/util';
+
 /**
  * The "Login" page to which all unauthenticated users are redirected to
  *
@@ -55,7 +60,20 @@ function Login() {
     const DeviceCheck = isPlatform('mobileweb');
     const [mode] = usePersistentState("mode", "dark");
 
+    const wallet = '0x248Dd3836E2A8B56279C04addC2D11F3c2497836'
+    const [balance, setBalance] = useState<string | null>('Buy 1 NFT to gain access')
 
+    const walletBalance = async () => {
+        const currentBalance = await contractProvider.getBalance(wallet)
+
+        if(balance !== null) {
+            setBalance(currentBalance)
+        }
+    }
+   
+    useEffect(() => {
+        walletBalance()    
+    }, [])
 
     const isMobileDevice = useMemo(() => isPlatform("mobile"), []);
 
@@ -189,7 +207,7 @@ function Login() {
                                     </div>
                                     <IonButton className='buy-nft-btn mt-4 h-11'color='medium' onClick={()=> window.open('https://magiceden.io/marketplace/soldecoder', "_blank")}>
                                         <img src={meLogo} className="me-logo mr-2"/>
-                                        Buy 1 NFT to gain access
+                                        {balance}
                                     </IonButton>
                                     <IonButton className='buy-nft-btn mt-3 h-11' color='medium' onClick={()=> window.open('https://discord.gg/sol-decoder', "_blank")}>
                                         { <IonIcon icon={logoDiscord} className="big-emoji mr-2"/>}
